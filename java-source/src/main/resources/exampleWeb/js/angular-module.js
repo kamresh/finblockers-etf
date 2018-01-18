@@ -34,11 +34,11 @@ app.controller('DemoAppController', function($http, $location, $uibModal) {
 
     $http.get(apiBaseURL + "peers").then((response) => peers = response.data.peers);
 
-    demoApp.openModal = () => {
-        const modalInstance = $uibModal.open({
-            templateUrl: 'demoAppModal.html',
-            controller: 'ModalInstanceCtrl',
-            controllerAs: 'modalInstance',
+    demoApp.openModalForAP = () => {
+        const modalInstanceAP = $uibModal.open({
+            templateUrl: 'demoAppModalForAP.html',
+            controller: 'ModalInstanceCtrlAP',
+            controllerAs: 'modalInstanceAP',
             resolve: {
                 demoApp: () => demoApp,
                 apiBaseURL: () => apiBaseURL,
@@ -46,7 +46,34 @@ app.controller('DemoAppController', function($http, $location, $uibModal) {
             }
         });
 
-        modalInstance.result.then(() => {}, () => {});
+        modalInstanceAP.result.then(() => {}, () => {});
+    };
+
+    demoApp.openModalForETF = () => {
+        const modalInstanceETF = $uibModal.open({
+            templateUrl: 'demoAppModalForETF.html',
+            controller: 'ModalInstanceCtrlETF',
+            controllerAs: 'modalInstanceETF',
+            resolve: {
+                demoApp: () => demoApp,
+                apiBaseURL: () => apiBaseURL,
+                peers: () => peers
+            }
+        });
+
+        modalInstanceETF.result.then(() => {}, () => {});
+    };
+
+    demoApp.isAPNode = () => {
+         if(demoApp.thisNode === "C=IN,L=Pune,O=AP"){
+            return true;
+         }
+    };
+
+    demoApp.isETFNode = () => {
+        if(demoApp.thisNode === "C=IN,L=Pune,O=ETF"){
+            return true;
+        }
     };
 
     demoApp.getIOUs = () => $http.get(apiBaseURL + "ious")
@@ -57,38 +84,38 @@ app.controller('DemoAppController', function($http, $location, $uibModal) {
     demoApp.getIOUs();
 });
 
-app.controller('ModalInstanceCtrl', function ($http, $location, $uibModalInstance, $uibModal, demoApp, apiBaseURL, peers) {
-    const modalInstance = this;
+app.controller('ModalInstanceCtrlAP', function ($http, $location, $uibModalInstance, $uibModal, demoApp, apiBaseURL, peers) {
+    const modalInstanceAP = this;
 
-    modalInstance.peers = peers;
-    modalInstance.form = {};
-    modalInstance.formError = false;
+    modalInstanceAP.peers = peers;
+    modalInstanceAP.form = {};
+    modalInstanceAP.formError = false;
 
     // Validate and create IOU.
-    modalInstance.create = () => {
+    modalInstanceAP.create = () => {
         if (invalidFormInput()) {
-            modalInstance.formError = true;
+            modalInstanceAP.formError = true;
         } else {
-            modalInstance.formError = false;
+            modalInstanceAP.formError = false;
 
             $uibModalInstance.close();
 
-            const createIOUEndpoint = `${apiBaseURL}create-iou?partyName=${modalInstance.form.counterparty}&iouValue=${modalInstance.form.value}`;
+            const createIOUEndpoint = `${apiBaseURL}create-iou?partyName=${modalInstanceAP.form.counterpartyap}&iouValue=${modalInstanceAP.form.valueap}`;
 
             // Create PO and handle success / fail responses.
             $http.put(createIOUEndpoint).then(
                 (result) => {
-                    modalInstance.displayMessage(result);
+                    modalInstanceAP.displayMessage(result);
                     demoApp.getIOUs();
                 },
                 (result) => {
-                    modalInstance.displayMessage(result);
+                    modalInstanceAP.displayMessage(result);
                 }
             );
         }
     };
 
-    modalInstance.displayMessage = (message) => {
+    modalInstanceAP.displayMessage = (message) => {
         const modalInstanceTwo = $uibModal.open({
             templateUrl: 'messageContent.html',
             controller: 'messageCtrl',
@@ -101,11 +128,63 @@ app.controller('ModalInstanceCtrl', function ($http, $location, $uibModalInstanc
     };
 
     // Close create IOU modal dialogue.
-    modalInstance.cancel = () => $uibModalInstance.dismiss();
+    modalInstanceAP.cancel = () => $uibModalInstance.dismiss();
 
     // Validate the IOU.
     function invalidFormInput() {
-        return isNaN(modalInstance.form.value) || (modalInstance.form.counterparty === undefined);
+        return isNaN(modalInstanceAP.form.valueap) || (modalInstanceAP.form.counterpartyap === undefined);
+    }
+});
+
+app.controller('ModalInstanceCtrlETF', function ($http, $location, $uibModalInstance, $uibModal, demoApp, apiBaseURL, peers) {
+    const modalInstanceETF = this;
+
+    modalInstanceETF.peers = peers;
+    modalInstanceETF.form = {};
+    modalInstanceETF.formError = false;
+
+    // Validate and create IOU.
+    modalInstanceETF.create = () => {
+        if (invalidFormInput()) {
+            modalInstanceETF.formError = true;
+        } else {
+            modalInstanceETF.formError = false;
+
+            $uibModalInstance.close();
+
+            const createIOUEndpoint = `${apiBaseURL}create-iou?partyName=${modalInstanceETF.form.counterpartyetf}&iouValue=${modalInstanceETF.form.valueetf}`;
+
+            // Create PO and handle success / fail responses.
+            $http.put(createIOUEndpoint).then(
+                (result) => {
+                    modalInstanceETF.displayMessage(result);
+                    demoApp.getIOUs();
+                },
+                (result) => {
+                    modalInstanceETF.displayMessage(result);
+                }
+            );
+        }
+    };
+
+    modalInstanceETF.displayMessage = (message) => {
+        const modalInstanceTwo = $uibModal.open({
+            templateUrl: 'messageContent.html',
+            controller: 'messageCtrl',
+            controllerAs: 'modalInstanceTwo',
+            resolve: { message: () => message }
+        });
+
+        // No behaviour on close / dismiss.
+        modalInstanceTwo.result.then(() => {}, () => {});
+    };
+
+    // Close create IOU modal dialogue.
+    modalInstanceETF.cancel = () => $uibModalInstance.dismiss();
+
+    // Validate the IOU.
+    function invalidFormInput() {
+        return isNaN(modalInstanceETF.form.valueetf) || (modalInstanceETF.form.counterpartyetf === undefined);
     }
 });
 

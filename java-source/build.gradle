@@ -52,16 +52,16 @@ tasks.withType(JavaCompile) {
 
 task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
     directory "./build/nodes"
-    networkMap "O=Controller,L=London,C=GB"
+    networkMap "O=Controller,L=Pune,C=IN"
     node {
-        name "O=Controller,L=London,C=GB"
+        name "O=Controller,L=Pune,C=IN"
         advertisedServices = ["corda.notary.validating"]
         p2pPort 10002
         rpcPort 10003
         cordapps = ["$corda_release_group:corda-finance:$corda_release_version"]
     }
     node {
-        name "O=PartyA,L=London,C=GB"
+        name "O=AP,L=Pune,C=IN"
         advertisedServices = []
         p2pPort 10005
         rpcPort 10006
@@ -72,22 +72,11 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         ]]]
     }
     node {
-        name "O=PartyB,L=New York,C=US"
+        name "O=ETF,L=Pune,C=IN"
         advertisedServices = []
         p2pPort 10008
         rpcPort 10009
         webPort 10010
-        cordapps = ["$corda_release_group:corda-finance:$corda_release_version"]
-        rpcUsers = [[ user: "user1", "password": "test", "permissions": [
-                "StartFlow.com.cts.hackathon.finblockers.flow.ETFCreationFlow\$Initiator"
-        ]]]
-    }
-    node {
-        name "O=PartyC,L=Paris,C=FR"
-        advertisedServices = []
-        p2pPort 10011
-        rpcPort 10012
-        webPort 10013
         cordapps = ["$corda_release_group:corda-finance:$corda_release_version"]
         rpcUsers = [[ user: "user1", "password": "test", "permissions": [
                 "StartFlow.com.cts.hackathon.finblockers.flow.ETFCreationFlow\$Initiator"

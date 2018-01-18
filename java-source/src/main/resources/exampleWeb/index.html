@@ -16,7 +16,7 @@ COMING WEEKS WE'LL WRITE A TUTORIAL ON HOW BEST TO DO THIS.
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Example CorDapp</title>
+    <title>ETF Creation Process</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
@@ -35,36 +35,67 @@ COMING WEEKS WE'LL WRITE A TUTORIAL ON HOW BEST TO DO THIS.
         <div class="navbar-header">
             <a class="navbar-brand" href="#">{{demoApp.thisNode}}</a>
         </div>
-        <button ng-click="demoApp.openModal()" type="button" class="btn btn-primary navbar-btn">Create IOU</button>
+        <button ng-click="demoApp.openModalForAP()" ng-show="demoApp.isAPNode()" type="button" class="btn btn-primary navbar-btn">Request ETF</button>
+        <button ng-click="demoApp.openModalForETF()" ng-show="demoApp.isETFNode()" type="button" class="btn btn-primary navbar-btn">Issue ETF</button>
     </div>
 </nav>
-<script type="text/ng-template" id="demoAppModal.html">
+<script type="text/ng-template" id="demoAppModalForAP.html">
     <div class="modal-header">
-        <h4 class="modal-title">Add new IOU</h4>
+        <h4 class="modal-title">Create New Request</h4>
     </div>
     <form>
         <div class="modal-body">
             <div class="form-group">
-                <label for="counterparty" class="control-label">Counter-party:</label>
-                <select ng-model="modalInstance.form.counterparty" class="form-control" id="counterparty"
-                        ng-options="peer as peer for peer in modalInstance.peers">
+                <label for="counterpartyap" class="control-label">Counter-party:</label>
+                <select ng-model="modalInstanceAP.form.counterpartyap" class="form-control" id="counterpartyap"
+                        ng-options="peer as peer for peer in modalInstanceAP.peers">
                 </select>
             </div>
             <div class="form-group">
-                <label for="value" class="control-label">Value (Int):</label>
-                <input type="text" ng-model="modalInstance.form.value" class="form-control" id="value">
+                <label for="valueap" class="control-label">Value (Int):</label>
+                <input type="text" ng-model="modalInstanceAP.form.valueap" class="form-control" id="valueap">
             </div>
-            <div ng-show="modalInstance.formError" class="form-group">
+            <div ng-show="modalInstanceAP.formError" class="form-group">
                 <div class="alert alert-danger" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Error:</span>
-                    Enter valid IOU parameters
+                    Enter valid request parameters
                 </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button ng-click="modalInstance.cancel()" type="button" class="btn btn-default">Close</button>
-            <button ng-click="modalInstance.create()" type="button" class="btn btn-primary">Create IOU</button>
+            <button ng-click="modalInstanceAP.cancel()" type="button" class="btn btn-default">Close</button>
+            <button ng-click="modalInstanceAP.create()" type="button" class="btn btn-primary">Create Request</button>
+        </div>
+    </form>
+</script>
+<script type="text/ng-template" id="demoAppModalForETF.html">
+    <div class="modal-header">
+        <h4 class="modal-title">Issue ETFs</h4>
+    </div>
+    <form>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="counterpartyetf" class="control-label">Counter-party:</label>
+                <select ng-model="modalInstanceETF.form.counterpartyetf" class="form-control" id="counterpartyetf"
+                        ng-options="peer as peer for peer in modalInstanceETF.peers">
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="valueetf" class="control-label">Value (Int):</label>
+                <input type="text" ng-model="modalInstanceETF.form.valueetf" class="form-control" id="valueetf">
+            </div>
+            <div ng-show="modalInstanceETF.formError" class="form-group">
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    Enter valid issue parameters
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button ng-click="modalInstanceETF.cancel()" type="button" class="btn btn-default">Close</button>
+            <button ng-click="modalInstanceETF.create()" type="button" class="btn btn-primary">Issue ETFs</button>
         </div>
     </form>
 </script>
@@ -74,25 +105,50 @@ COMING WEEKS WE'LL WRITE A TUTORIAL ON HOW BEST TO DO THIS.
     </div>
 </script>
 
-<div class="row">
+<div class="row" ng-show="demoApp.isAPNode()">
     <div class="col-md-1"></div>
     <div class="col-md-10">
         <div ng-show="!demoApp.ious.length" class="panel panel-primary">
             <div class="panel-heading">
-                <h3 class="panel-title">There are no recorded IOUs</h3>
+                <h3 class="panel-title">There are no records.</h3>
             </div>
-            <div class="panel-body">Use the "Create IOU" button to send an IOU to a peer.</div>
+            <div class="panel-body">Use the "Request ETF" button to send a request to ETF provider.</div>
         </div>
         <div ng-show="demoApp.ious.length" class="panel panel-primary">
             <div class="panel-heading">
-                <h3 class="panel-title">Recorded IOUs:</h3>
+                <h3 class="panel-title">Records:</h3>
             </div>
         </div>
         <div ng-repeat="iou in demoApp.ious" class="panel panel-default">
             <div class="panel-body">
                 <ul>
-                    <li>Lender: {{iou.lender}}</li>
-                    <li>Borrower: {{iou.borrower}}</li>
+                    <li>Sender: {{iou.lender}}</li>
+                    <li>Receiver: {{iou.borrower}}</li>
+                    <li>Value: {{iou.value}}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-1"></div>
+</div>
+<div class="row" ng-show="demoApp.isETFNode()">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <div ng-show="!demoApp.ious.length" class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">There are no records</h3>
+            </div>
+        </div>
+        <div ng-show="demoApp.ious.length" class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Records:</h3>
+            </div>
+        </div>
+        <div ng-repeat="iou in demoApp.ious" class="panel panel-default">
+            <div class="panel-body">
+                <ul>
+                    <li>Sender: {{iou.lender}}</li>
+                    <li>Receiver: {{iou.borrower}}</li>
                     <li>Value: {{iou.value}}</li>
                 </ul>
             </div>
